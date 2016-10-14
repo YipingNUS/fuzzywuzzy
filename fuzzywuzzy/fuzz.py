@@ -125,6 +125,7 @@ def fuzzy_find(s1, s2):
 	    long_substr = long_substr[:long_substr.rfind(shorter_last_char)+1]
 	elif remaining_str.find(shorter_last_char)>=0 and remaining_str.find(shorter_last_char)<len(shorter)/3:
 	    long_substr = long_substr + remaining_str[:remaining_str.find(shorter_last_char)+1]
+        long_substr = long_substr.strip()
         m2 = SequenceMatcher(None, shorter, long_substr)
         r = m2.ratio()
         if r > max_r:
