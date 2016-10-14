@@ -90,6 +90,39 @@ def partial_ratio(s1, s2):
     return utils.intr(100 * max(scores))
 
 
+@utils.check_for_none
+@utils.check_empty_string
+def fuzzy_find(s1, s2):
+    """" Find the best match of str1 in str2
+        Return the ratio of the most similar substring
+        as a number between 0 and 100 and the substring of str2"""
+    s1, s2 = utils.make_type_consistent(s1, s2)
+    
+    shorter = s1
+    longer = s2
+    
+    m = SequenceMatcher(None, shorter, longer)
+    blocks = m.get_matching_blocks()
+
+    # each block represents a sequence of matching characters in a string
+    # of the form (idx_1, idx_2, len)
+    # the best partial match will block align with at least one of those blocks
+    #   e.g. shorter = "abcd", longer = XXXbcdeEEE
+    #   block = (1,3,3)
+    #   best score === ratio("abcd", "Xbcd")
+    max_r = -1
+    max_substr = None
+    for block in blocks:
+        long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
+        long_end = long_start + len(shorter)
+        long_substr = longer[long_start:long_end]
+        
+        m2 = SequenceMatcher(None, shorter, long_substr)
+        r = m2.ratio()
+        if r > max_r:
+            max_r = r
+            max_substr = long_substr
+    return utils.intr(100 * max_r), max_substr
 ##############################
 # Advanced Scoring Functions #
 ##############################
