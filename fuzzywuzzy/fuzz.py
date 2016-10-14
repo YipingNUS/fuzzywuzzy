@@ -99,8 +99,9 @@ def fuzzy_find(s1, s2):
     s1, s2 = utils.make_type_consistent(s1, s2)
     
     shorter = s1
+    shorter_last_char = shorter[-1]
     longer = s2
-    
+
     m = SequenceMatcher(None, shorter, longer)
     blocks = m.get_matching_blocks()
 
@@ -115,8 +116,15 @@ def fuzzy_find(s1, s2):
     for block in blocks:
         long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
         long_end = long_start + len(shorter)
+	if long_end > len(longer):
+	    long_end = len(longer)
         long_substr = longer[long_start:long_end]
-        
+	remaining_str = longer[long_end:]
+
+        if long_substr.rfind(shorter_last_char) >= 0 and len(long_substr) - long_substr.rfind(shorter_last_char) < len(shorter)/3:
+	    long_substr = long_substr[:long_substr.rfind(shorter_last_char)+1]
+	elif remaining_str.find(shorter_last_char)>=0 and remaining_str.find(shorter_last_char)<len(shorter)/3:
+	    long_substr = long_substr + remaining_str[:remaining_str.find(shorter_last_char)+1]
         m2 = SequenceMatcher(None, shorter, long_substr)
         r = m2.ratio()
         if r > max_r:
