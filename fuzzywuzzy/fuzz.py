@@ -97,9 +97,7 @@ def fuzzy_find(s1, s2):
         Return the ratio of the most similar substring
         as a number between 0 and 100 and the substring of str2"""
     s1, s2 = utils.make_type_consistent(s1, s2)
-    
     shorter = s1
-    shorter_last_char = shorter[-1]
     longer = s2
 
     m = SequenceMatcher(None, shorter, longer)
@@ -112,7 +110,7 @@ def fuzzy_find(s1, s2):
     #   block = (1,3,3)
     #   best score === ratio("abcd", "Xbcd")
     max_r = -1
-    max_substr = None
+    max_substr = ''
     for block in blocks:
         long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
         long_end = long_start + len(shorter)
@@ -121,11 +119,19 @@ def fuzzy_find(s1, s2):
         long_substr = longer[long_start:long_end]
 	remaining_str = longer[long_end:]
 
-        if long_substr.rfind(shorter_last_char) >= 0 and len(long_substr) - long_substr.rfind(shorter_last_char) < len(shorter)/3:
-	    long_substr = long_substr[:long_substr.rfind(shorter_last_char)+1]
-	elif remaining_str.find(shorter_last_char)>=0 and remaining_str.find(shorter_last_char)<len(shorter)/3:
-	    long_substr = long_substr + remaining_str[:remaining_str.find(shorter_last_char)+1]
-        long_substr = long_substr.strip()
+	if long_start-1>0 and longer[long_start-1] != ' ':
+	    if long_substr.find(' ') < 3 and long_substr.find(' ')>=0:
+                long_start = long_start + long_substr.find(' ')
+	    else:
+                while long_start>=0 and longer[long_start] != ' ':
+	            long_start -= 1
+	if long_end+1 < len(longer)-1 and longer[long_end+1] != ' ':
+	    if long_substr.rfind(' ')>=0 and long_substr.rfind(' ')>len(long_substr)-3:
+		long_end -= (len(long_substr)-long_substr.rfind(' ')-1)
+	    else:
+		while long_end < len(longer)-1 and longer[long_end] != ' ':
+		    long_end += 1
+	long_substr = longer[long_start:long_end].strip()
         m2 = SequenceMatcher(None, shorter, long_substr)
         r = m2.ratio()
         if r > max_r:
